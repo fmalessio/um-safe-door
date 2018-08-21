@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Safe Door UM</string>
+    <string name="test1">fmalessio1</string>
+    <string name="test2">fmalessio2</string>
+    <string name="test3">fmalessio3</string>
+    <string name="open_door">Abrir puerta</string>
+    <string name="close_door">Cerrar puerta</string>
+    <string name="connect_bluetooth">Conectar bluetooth</string>
+</resources>
