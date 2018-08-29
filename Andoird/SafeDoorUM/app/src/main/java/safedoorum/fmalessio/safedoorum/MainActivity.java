@@ -21,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView lock_state_img;
     private Button lock_state_btn;
     private Button bluetooth_connect_btn;
+    private Button view_bluetooth_list_btn;
 
     private final String DEVICE_ADDRESS = "98:D3:71:FD:41:6D"; // MAC Address of Bluetooth Module
     private final UUID PORT_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
         lock_state_img = findViewById(R.id.lock_state_img);
         lock_state_btn = findViewById(R.id.lock_state_btn);
         bluetooth_connect_btn = findViewById(R.id.bluetooth_connect_btn);
+        view_bluetooth_list_btn = findViewById(R.id.view_bluetooth_list_btn);
 
         // set vars
         door_closed = true;
@@ -48,12 +50,18 @@ public class MainActivity extends AppCompatActivity {
         lock_state_img.setOnClickListener(changeLockStateListener());
         lock_state_btn.setOnClickListener(changeLockStateListener());
         bluetooth_connect_btn.setOnClickListener(bluetoothConnectionListener());
+        view_bluetooth_list_btn.setOnClickListener(viewBluetoothDevicesListener());
     }
 
     private View.OnClickListener changeLockStateListener() {
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (socket == null) {
+                    Toast.makeText(getApplicationContext(), "No se ha conectado ningún dispositivo", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
                 try {
                     if (door_closed) {
                         socket.getOutputStream().write("a".getBytes());
@@ -85,6 +93,18 @@ public class MainActivity extends AppCompatActivity {
         };
     }
 
+    private View.OnClickListener viewBluetoothDevicesListener() {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent btList = new Intent(MainActivity.this, BluetoothListActivity.class);
+                startActivity(btList);
+                // TODO: return activity result
+                // https://developer.android.com/training/basics/intents/result?hl=es-419
+            }
+        };
+    }
+
     // Initializes bluetooth module
     public boolean initializeBT() {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -95,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
 
-        // Checks if bluetooth is enabled. If not, the program will ask permission from the user to enable it
+        // Checks if bluetooth is enabled.
         if (!bluetoothAdapter.isEnabled()) {
             Intent enableAdapter = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableAdapter, 0);
@@ -138,6 +158,12 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        // TODO: disconnect the bluetooth
+        super.onDestroy();
     }
 
 }

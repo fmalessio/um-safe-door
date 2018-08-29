@@ -23,10 +23,18 @@
         android:id="@+id/lock_state_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/view_bluetooth_list_btn"
+        android:layout_toEndOf="@+id/view_bluetooth_list_btn"
+        android:text="@string/open_door" />
+
+    <Button
+        android:id="@+id/view_bluetooth_list_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="90dp"
-        android:text="@string/open_door" />
+        android:text="@string/view_bluetooth_list" />
 
     <Button
         android:id="@+id/bluetooth_connect_btn"
