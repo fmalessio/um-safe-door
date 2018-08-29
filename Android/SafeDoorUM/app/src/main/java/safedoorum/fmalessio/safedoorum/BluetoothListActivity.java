@@ -75,6 +75,9 @@ public class BluetoothListActivity extends AppCompatActivity {
             Intent enableAdapter = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableAdapter, 0);
 
+            // TODO: leer resultado de startActivityForResult, si se aceptó cargar lista
+            // sino cerrar activity
+
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
