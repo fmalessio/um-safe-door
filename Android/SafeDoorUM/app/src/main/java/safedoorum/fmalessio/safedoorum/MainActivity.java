@@ -28,6 +28,9 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothDevice device;
     private BluetoothSocket socket;
 
+    // Activities result codes
+    static final int PICK_BLUETOOHT_DEVICE = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,6 +54,24 @@ public class MainActivity extends AppCompatActivity {
         lock_state_btn.setOnClickListener(changeLockStateListener());
         bluetooth_connect_btn.setOnClickListener(bluetoothConnectionListener());
         view_bluetooth_list_btn.setOnClickListener(viewBluetoothDevicesListener());
+    }
+
+    /**
+     * https://developer.android.com/training/basics/intents/result?hl=es-419
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != RESULT_OK) {
+            Toast.makeText(getApplicationContext(), "Error onActivityResult:" + requestCode, Toast.LENGTH_LONG).show();
+        }
+
+        if (requestCode == PICK_BLUETOOHT_DEVICE) {
+            Bundle extras = data.getExtras();
+            if(extras != null) {
+                String btAddress = data.getStringExtra("BT_DEVICE_ADDRESS");
+                connectBT(btAddress);
+            }
+        }
     }
 
     private View.OnClickListener changeLockStateListener() {
@@ -98,14 +119,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent btList = new Intent(MainActivity.this, BluetoothListActivity.class);
-                startActivity(btList);
+                //startActivity(btList);
                 // TODO: return activity result
                 // https://developer.android.com/training/basics/intents/result?hl=es-419
+                startActivityForResult(btList, PICK_BLUETOOHT_DEVICE);
             }
         };
     }
 
     // Initializes bluetooth module
+    @Deprecated
     public boolean initializeBT() {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -145,6 +168,40 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
+    /**
+     * BT Adapter is already validated and enabled
+     */
+    public boolean connectBT(String btAddress) {
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        Set<BluetoothDevice> bondedDevices = bluetoothAdapter.getBondedDevices();
+
+        BluetoothDevice device = null;
+        for (BluetoothDevice iterator : bondedDevices) {
+            if (iterator.getAddress().equals(btAddress)) {
+                device = iterator;
+            }
+        }
+
+        if(device == null) {
+            Toast.makeText(getApplicationContext(),
+                    "Se ha perdido la conexión con el dispositivo", Toast.LENGTH_LONG).show();
+        }
+
+        try {
+            // Creating a socket with the BT device
+            socket = device.createRfcommSocketToServiceRecord(PORT_UUID);
+            socket.connect();
+
+            Toast.makeText(getApplicationContext(),
+                    "Conectado correctamente", Toast.LENGTH_LONG).show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    @Deprecated
     public boolean connectBT() {
         try {
             // Creating a socket with the BT device

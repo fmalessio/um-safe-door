@@ -1,5 +1,6 @@
 package safedoorum.fmalessio.safedoorum;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -24,6 +25,7 @@ public class BluetoothListActivity extends AppCompatActivity {
     private ListView listView;
     private ArrayAdapter aAdapter;
     // Attributes
+    // TODO: obtener este valor de el item
     private final UUID PORT_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
     // private final String DEVICE_ADDRESS = "98:D3:71:FD:41:6D"; // MAC Address of Bluetooth Module
     private BluetoothSocket socket;
@@ -55,9 +57,18 @@ public class BluetoothListActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 BluetoothDevice bluetooth = (BluetoothDevice) parent.getAdapter().getItem(position);
-                connectDevices(bluetooth);
+                sendDeviceInfoAndClose(bluetooth);
+                //connectDevices(bluetooth);
             }
         });
+    }
+
+    private void sendDeviceInfoAndClose(BluetoothDevice bluetooth) {
+        Intent resultData = new Intent();
+        resultData.putExtra("BT_DEVICE_ADDRESS", bluetooth.getAddress());
+        // TODO: bluetooth.getUuids();
+        setResult(Activity.RESULT_OK, resultData);
+        finish();
     }
 
     private boolean startMyBluetooth() {
@@ -75,7 +86,7 @@ public class BluetoothListActivity extends AppCompatActivity {
             Intent enableAdapter = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableAdapter, 0);
 
-            // TODO: leer resultado de startActivityForResult, si se aceptó cargar lista
+            // TODO: leer resultado de startActivityForResult, cargar la lista nuevamente
             // sino cerrar activity
 
             try {
@@ -106,6 +117,7 @@ public class BluetoothListActivity extends AppCompatActivity {
         listView.setAdapter(aAdapter);
     }
 
+    @Deprecated
     public boolean connectDevices(BluetoothDevice bluetooth) {
         try {
             // Creating a socket with the BT device
