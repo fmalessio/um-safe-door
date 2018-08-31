@@ -17,19 +17,17 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
+    // Activities result codes
+    static final int PICK_BLUETOOHT_DEVICE = 1;
+    private final String DEVICE_ADDRESS = "98:D3:71:FD:41:6D"; // MAC Address of Bluetooth Module
+    private final UUID PORT_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
     private boolean door_closed;
     private ImageView lock_state_img;
     private Button lock_state_btn;
     private Button bluetooth_connect_btn;
     private Button view_bluetooth_list_btn;
-
-    private final String DEVICE_ADDRESS = "98:D3:71:FD:41:6D"; // MAC Address of Bluetooth Module
-    private final UUID PORT_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
     private BluetoothDevice device;
     private BluetoothSocket socket;
-
-    // Activities result codes
-    static final int PICK_BLUETOOHT_DEVICE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private void addListeners() {
         lock_state_img.setOnClickListener(changeLockStateListener());
         lock_state_btn.setOnClickListener(changeLockStateListener());
-        bluetooth_connect_btn.setOnClickListener(bluetoothConnectionListener());
+        // bluetooth_connect_btn.setOnClickListener(bluetoothConnectionListener());
         view_bluetooth_list_btn.setOnClickListener(viewBluetoothDevicesListener());
     }
 
@@ -61,15 +59,15 @@ public class MainActivity extends AppCompatActivity {
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode != RESULT_OK) {
-            Toast.makeText(getApplicationContext(), "Error onActivityResult:" + requestCode, Toast.LENGTH_LONG).show();
-        }
-
         if (requestCode == PICK_BLUETOOHT_DEVICE) {
-            Bundle extras = data.getExtras();
-            if(extras != null) {
-                String btAddress = data.getStringExtra("BT_DEVICE_ADDRESS");
-                connectBT(btAddress);
+            if (resultCode == RESULT_OK) {
+                Bundle extras = data.getExtras();
+                if (extras != null) {
+                    String btAddress = data.getStringExtra("BT_DEVICE_ADDRESS");
+                    connectBT(btAddress);
+                }
+            } else {
+                Toast.makeText(getApplicationContext(), "Error onActivityResult:" + requestCode, Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -102,70 +100,14 @@ public class MainActivity extends AppCompatActivity {
         };
     }
 
-    private View.OnClickListener bluetoothConnectionListener() {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (initializeBT()) {
-                    connectBT();
-                    // beginListenForData();
-                }
-            }
-        };
-    }
-
     private View.OnClickListener viewBluetoothDevicesListener() {
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent btList = new Intent(MainActivity.this, BluetoothListActivity.class);
-                //startActivity(btList);
-                // TODO: return activity result
-                // https://developer.android.com/training/basics/intents/result?hl=es-419
                 startActivityForResult(btList, PICK_BLUETOOHT_DEVICE);
             }
         };
-    }
-
-    // Initializes bluetooth module
-    @Deprecated
-    public boolean initializeBT() {
-        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
-        // Checks if the device supports bluetooth
-        if (bluetoothAdapter == null) {
-            Toast.makeText(getApplicationContext(), "El dispositivo no soporta bluetooth", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-
-        // Checks if bluetooth is enabled.
-        if (!bluetoothAdapter.isEnabled()) {
-            Intent enableAdapter = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableAdapter, 0);
-
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        Set<BluetoothDevice> bondedDevices = bluetoothAdapter.getBondedDevices();
-
-        // Searching our bluetooth module
-        if (bondedDevices.isEmpty()) {
-            Toast.makeText(getApplicationContext(), "Primero debe emparejar el bluetooth", Toast.LENGTH_SHORT).show();
-        } else {
-            for (BluetoothDevice iterator : bondedDevices) {
-                if (iterator.getAddress().equals(DEVICE_ADDRESS)) {
-                    device = iterator;
-                    return true;
-                }
-            }
-        }
-
-        Toast.makeText(getApplicationContext(), "No se ha encontrado el dispositvo especificado", Toast.LENGTH_SHORT).show();
-        return false;
     }
 
     /**
@@ -182,27 +124,11 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        if(device == null) {
+        if (device == null) {
             Toast.makeText(getApplicationContext(),
                     "Se ha perdido la conexión con el dispositivo", Toast.LENGTH_LONG).show();
         }
 
-        try {
-            // Creating a socket with the BT device
-            socket = device.createRfcommSocketToServiceRecord(PORT_UUID);
-            socket.connect();
-
-            Toast.makeText(getApplicationContext(),
-                    "Conectado correctamente", Toast.LENGTH_LONG).show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-
-    @Deprecated
-    public boolean connectBT() {
         try {
             // Creating a socket with the BT device
             socket = device.createRfcommSocketToServiceRecord(PORT_UUID);

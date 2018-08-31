@@ -14,19 +14,18 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
 
 public class BluetoothListActivity extends AppCompatActivity {
 
-    // Layout
-    private ListView listView;
-    private ArrayAdapter aAdapter;
     // Attributes
     // TODO: obtener este valor de el item
     private final UUID PORT_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
+    // Layout
+    private ListView listView;
+    private ArrayAdapter aAdapter;
     // private final String DEVICE_ADDRESS = "98:D3:71:FD:41:6D"; // MAC Address of Bluetooth Module
     private BluetoothSocket socket;
     private ArrayList<String> mDeviceList = new ArrayList<>();
@@ -45,9 +44,7 @@ public class BluetoothListActivity extends AppCompatActivity {
 
         setUIConfigs();
 
-        if (startMyBluetooth()) {
-            listBluetoothDevices();
-        }
+        startMyBluetooth();
     }
 
     // UI configurations
@@ -58,7 +55,6 @@ public class BluetoothListActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 BluetoothDevice bluetooth = (BluetoothDevice) parent.getAdapter().getItem(position);
                 sendDeviceInfoAndClose(bluetooth);
-                //connectDevices(bluetooth);
             }
         });
     }
@@ -95,6 +91,9 @@ public class BluetoothListActivity extends AppCompatActivity {
                 e.printStackTrace();
                 return false;
             }
+
+        } else {
+            listBluetoothDevices(); // TODO: agregar esto en el resultado del BT despertador
         }
 
         return true;
@@ -102,11 +101,6 @@ public class BluetoothListActivity extends AppCompatActivity {
 
     private void listBluetoothDevices() {
         Set<BluetoothDevice> devices = myBluetoothAdapter.getBondedDevices();
-
-        // Searching our bluetooth module
-        if (devices.isEmpty()) {
-            Toast.makeText(getApplicationContext(), "Primero debe emparejar el bluetooth", Toast.LENGTH_SHORT).show();
-        }
 
         ArrayList<BluetoothDevice> list = new ArrayList();
         for (BluetoothDevice device : devices) {
@@ -117,21 +111,9 @@ public class BluetoothListActivity extends AppCompatActivity {
         listView.setAdapter(aAdapter);
     }
 
-    @Deprecated
-    public boolean connectDevices(BluetoothDevice bluetooth) {
-        try {
-            // Creating a socket with the BT device
-            socket = bluetooth.createRfcommSocketToServiceRecord(PORT_UUID);
-            socket.connect();
-
-            Toast.makeText(getApplicationContext(),
-                    "Conectado correctamente a " + bluetooth.getName(), Toast.LENGTH_LONG).show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            Toast.makeText(getApplicationContext(),
-                    "Error conectando a " + bluetooth.getName(), Toast.LENGTH_LONG).show();
-            return false;
-        }
-        return true;
+    @Override
+    public void onBackPressed() {
+        // TODO: back is crashing the app
     }
+
 }
