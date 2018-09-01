@@ -19,14 +19,12 @@ public class MainActivity extends AppCompatActivity {
 
     // Activities result codes
     static final int PICK_BLUETOOHT_DEVICE = 1;
-    private final String DEVICE_ADDRESS = "98:D3:71:FD:41:6D"; // MAC Address of Bluetooth Module
-    private final UUID PORT_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
     private boolean door_closed;
+    // UI
     private ImageView lock_state_img;
     private Button lock_state_btn;
     private Button bluetooth_connect_btn;
     private Button view_bluetooth_list_btn;
-    private BluetoothDevice device;
     private BluetoothSocket socket;
 
     @Override
@@ -54,24 +52,6 @@ public class MainActivity extends AppCompatActivity {
         view_bluetooth_list_btn.setOnClickListener(viewBluetoothDevicesListener());
     }
 
-    /**
-     * https://developer.android.com/training/basics/intents/result?hl=es-419
-     */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == PICK_BLUETOOHT_DEVICE) {
-            if (resultCode == RESULT_OK) {
-                Bundle extras = data.getExtras();
-                if (extras != null) {
-                    String btAddress = data.getStringExtra("BT_DEVICE_ADDRESS");
-                    connectBT(btAddress);
-                }
-            } else {
-                Toast.makeText(getApplicationContext(), "Error onActivityResult:" + requestCode, Toast.LENGTH_LONG).show();
-            }
-        }
-    }
-
     private View.OnClickListener changeLockStateListener() {
         return new View.OnClickListener() {
             @Override
@@ -80,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "No se ha conectado ningún dispositivo", Toast.LENGTH_LONG).show();
                     return;
                 }
-
                 try {
                     if (door_closed) {
                         socket.getOutputStream().write("a".getBytes());
@@ -111,9 +90,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * https://developer.android.com/training/basics/intents/result?hl=es-419
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == PICK_BLUETOOHT_DEVICE) {
+            if (resultCode == RESULT_OK) {
+                Bundle extras = data.getExtras();
+                if (extras != null) {
+                    String btAddress = data.getStringExtra("BT_DEVICE_ADDRESS");
+                    String btUUID = data.getStringExtra("BT_DEVICE_UUID");
+                    connectBT(btAddress, btUUID);
+                }
+            }
+        }
+    }
+
+    /**
      * BT Adapter is already validated and enabled
      */
-    public boolean connectBT(String btAddress) {
+    public boolean connectBT(String btAddress, String btUUID) {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         Set<BluetoothDevice> bondedDevices = bluetoothAdapter.getBondedDevices();
 
@@ -127,11 +123,13 @@ public class MainActivity extends AppCompatActivity {
         if (device == null) {
             Toast.makeText(getApplicationContext(),
                     "Se ha perdido la conexión con el dispositivo", Toast.LENGTH_LONG).show();
+            return false;
         }
 
         try {
             // Creating a socket with the BT device
-            socket = device.createRfcommSocketToServiceRecord(PORT_UUID);
+            UUID portUUID = UUID.fromString(btUUID);
+            socket = device.createRfcommSocketToServiceRecord(portUUID);
             socket.connect();
 
             Toast.makeText(getApplicationContext(),

@@ -3,7 +3,6 @@ package safedoorum.fmalessio.safedoorum;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -16,19 +15,15 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.UUID;
 
 public class BluetoothListActivity extends AppCompatActivity {
 
     // Attributes
-    // TODO: obtener este valor de el item
-    private final UUID PORT_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
-    // Layout
+    static final int REQUEST_ACTIVATE_BT = 1;
+    private final String STRING_BT_UUID = "00001101-0000-1000-8000-00805f9b34fb";
+    // UI
     private ListView listView;
     private ArrayAdapter aAdapter;
-    // private final String DEVICE_ADDRESS = "98:D3:71:FD:41:6D"; // MAC Address of Bluetooth Module
-    private BluetoothSocket socket;
-    private ArrayList<String> mDeviceList = new ArrayList<>();
     private BluetoothAdapter myBluetoothAdapter;
 
     @Override
@@ -59,10 +54,19 @@ public class BluetoothListActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * // UUID
+     * BT_DEVICE_ADDRESS = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
+     * // MAC Address, String
+     * DEVICE_ADDRESS = "98:D3:71:FD:41:6D";
+     *
+     * @param bluetooth
+     */
     private void sendDeviceInfoAndClose(BluetoothDevice bluetooth) {
         Intent resultData = new Intent();
         resultData.putExtra("BT_DEVICE_ADDRESS", bluetooth.getAddress());
-        // TODO: bluetooth.getUuids();
+        resultData.putExtra("BT_DEVICE_UUID", STRING_BT_UUID);
+
         setResult(Activity.RESULT_OK, resultData);
         finish();
     }
@@ -80,10 +84,7 @@ public class BluetoothListActivity extends AppCompatActivity {
         if (!myBluetoothAdapter.isEnabled()) {
             // myBluetoothAdapter.startDiscovery();
             Intent enableAdapter = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableAdapter, 0);
-
-            // TODO: leer resultado de startActivityForResult, cargar la lista nuevamente
-            // sino cerrar activity
+            startActivityForResult(enableAdapter, REQUEST_ACTIVATE_BT);
 
             try {
                 Thread.sleep(1000);
@@ -91,9 +92,8 @@ public class BluetoothListActivity extends AppCompatActivity {
                 e.printStackTrace();
                 return false;
             }
-
         } else {
-            listBluetoothDevices(); // TODO: agregar esto en el resultado del BT despertador
+            listBluetoothDevices();
         }
 
         return true;
@@ -107,13 +107,34 @@ public class BluetoothListActivity extends AppCompatActivity {
             list.add(device);
             // list.add("Name: "+ device.getName() + "MAC Address: " + device.getAddress());
         }
-        aAdapter = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, list);
+        aAdapter = new ArrayAdapter(getApplicationContext(), R.layout.sdum_simple_list_item, list);
         listView.setAdapter(aAdapter);
     }
 
+    /**
+     * Put CANCELED result if user press back
+     */
     @Override
     public void onBackPressed() {
-        // TODO: back is crashing the app
+        cancelBTListActivity();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_ACTIVATE_BT) {
+            if (resultCode == RESULT_OK) {
+                listBluetoothDevices();
+            } else {
+                Toast.makeText(getApplicationContext(), "BT cancelado (code:" + requestCode + ")", Toast.LENGTH_LONG).show();
+                cancelBTListActivity();
+            }
+        }
+    }
+
+    private void cancelBTListActivity() {
+        Intent resultData = new Intent();
+        setResult(Activity.RESULT_CANCELED, resultData);
+        finish();
     }
 
 }
