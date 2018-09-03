@@ -21,6 +21,7 @@ public class BluetoothListActivity extends AppCompatActivity {
     // Attributes
     static final int REQUEST_ACTIVATE_BT = 1;
     private final String STRING_BT_UUID = "00001101-0000-1000-8000-00805f9b34fb";
+    ArrayList<BluetoothDevice> devices;
     // UI
     private ListView listView;
     private ArrayAdapter aAdapter;
@@ -48,7 +49,7 @@ public class BluetoothListActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                BluetoothDevice bluetooth = (BluetoothDevice) parent.getAdapter().getItem(position);
+                BluetoothDevice bluetooth = devices.get(position);
                 sendDeviceInfoAndClose(bluetooth);
             }
         });
@@ -100,14 +101,21 @@ public class BluetoothListActivity extends AppCompatActivity {
     }
 
     private void listBluetoothDevices() {
-        Set<BluetoothDevice> devices = myBluetoothAdapter.getBondedDevices();
+        Set<BluetoothDevice> bondedDevices = myBluetoothAdapter.getBondedDevices();
 
-        ArrayList<BluetoothDevice> list = new ArrayList();
-        for (BluetoothDevice device : devices) {
-            list.add(device);
-            // list.add("Name: "+ device.getName() + "MAC Address: " + device.getAddress());
+        ArrayList<String> devicesString = new ArrayList<>();
+        devices = new ArrayList();
+
+        String sDevice;
+        for (BluetoothDevice device : bondedDevices) {
+            devices.add(device);
+            // Device presentation
+            sDevice = device.getName();
+            sDevice += System.getProperty("line.separator");
+            sDevice += device.getAddress();
+            devicesString.add(sDevice);
         }
-        aAdapter = new ArrayAdapter(getApplicationContext(), R.layout.sdum_simple_list_item, list);
+        aAdapter = new ArrayAdapter(getApplicationContext(), R.layout.sdum_simple_list_item, devicesString);
         listView.setAdapter(aAdapter);
     }
 
