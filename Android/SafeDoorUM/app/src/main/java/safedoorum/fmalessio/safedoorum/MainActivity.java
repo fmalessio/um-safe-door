@@ -6,6 +6,10 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -24,7 +28,6 @@ public class MainActivity extends AppCompatActivity {
     private ImageView lock_state_img;
     private Button lock_state_btn;
     private Button bluetooth_connect_btn;
-    private Button view_bluetooth_list_btn;
     private BluetoothSocket socket;
 
     @Override
@@ -36,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
         lock_state_img = findViewById(R.id.lock_state_img);
         lock_state_btn = findViewById(R.id.lock_state_btn);
         bluetooth_connect_btn = findViewById(R.id.bluetooth_connect_btn);
-        view_bluetooth_list_btn = findViewById(R.id.view_bluetooth_list_btn);
 
         // set vars
         door_closed = true;
@@ -49,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
         lock_state_img.setOnClickListener(changeLockStateListener());
         lock_state_btn.setOnClickListener(changeLockStateListener());
         // bluetooth_connect_btn.setOnClickListener(bluetoothConnectionListener());
-        view_bluetooth_list_btn.setOnClickListener(viewBluetoothDevicesListener());
     }
 
     private View.OnClickListener changeLockStateListener() {
@@ -75,16 +76,6 @@ public class MainActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }
-        };
-    }
-
-    private View.OnClickListener viewBluetoothDevicesListener() {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent btList = new Intent(MainActivity.this, BluetoothListActivity.class);
-                startActivityForResult(btList, PICK_BLUETOOHT_DEVICE);
             }
         };
     }
@@ -145,6 +136,27 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         // TODO: disconnect the bluetooth
         super.onDestroy();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_bluetooth_list, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.action_view_devices: {
+                Intent btList = new Intent(MainActivity.this, BluetoothListActivity.class);
+                startActivityForResult(btList, PICK_BLUETOOHT_DEVICE);
+                return true;
+            }
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
 }

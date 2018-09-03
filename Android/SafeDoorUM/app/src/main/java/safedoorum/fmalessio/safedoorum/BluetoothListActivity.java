@@ -32,9 +32,6 @@ public class BluetoothListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth_list);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
         // UI refences
         listView = findViewById(R.id.listView);
 
@@ -133,7 +130,7 @@ public class BluetoothListActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 listBluetoothDevices();
             } else {
-                Toast.makeText(getApplicationContext(), "BT cancelado (code:" + requestCode + ")", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "BT cancelado (rq-code:" + requestCode + ")", Toast.LENGTH_LONG).show();
                 cancelBTListActivity();
             }
         }
