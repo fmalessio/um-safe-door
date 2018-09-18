@@ -17,7 +17,7 @@
         android:layout_height="323dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        app:srcCompat="@drawable/safe_door_um_locked" />
+        app:srcCompat="@drawable/sdu_locked_blue" />
 
     <Button
         android:id="@+id/lock_state_btn"
@@ -25,16 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="88dp"
+        android:layout_marginBottom="73dp"
         android:text="@string/open_door" />
-
-    <Button
-        android:id="@+id/bluetooth_connect_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="16dp"
-        android:text="@string/connect_bluetooth" />
 
 </RelativeLayout>

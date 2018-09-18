@@ -26,7 +26,6 @@ public class MainActivity extends AppCompatActivity {
     // UI
     private ImageView lock_state_img;
     private Button lock_state_btn;
-    private Button bluetooth_connect_btn;
     private BluetoothSocket socket;
 
     @Override
@@ -37,9 +36,9 @@ public class MainActivity extends AppCompatActivity {
         // set views
         lock_state_img = findViewById(R.id.lock_state_img);
         lock_state_btn = findViewById(R.id.lock_state_btn);
-        bluetooth_connect_btn = findViewById(R.id.bluetooth_connect_btn);
 
         // set vars
+        // TODO: read this value from the Arduino BT module
         door_closed = true;
 
         // events
@@ -49,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
     private void addListeners() {
         lock_state_img.setOnClickListener(changeLockStateListener());
         lock_state_btn.setOnClickListener(changeLockStateListener());
-        // bluetooth_connect_btn.setOnClickListener(bluetoothConnectionListener());
     }
 
     private View.OnClickListener changeLockStateListener() {
@@ -62,13 +60,15 @@ public class MainActivity extends AppCompatActivity {
                 }
                 try {
                     if (door_closed) {
+                        // Open Door
                         socket.getOutputStream().write("a".getBytes());
-                        lock_state_img.setImageResource(R.drawable.safe_door_um_unlocked);
+                        lock_state_img.setImageResource(R.drawable.sdu_unlocked_blue);
                         lock_state_btn.setText(R.string.close_door);
                         door_closed = false;
                     } else {
+                        // Close Door
                         socket.getOutputStream().write("b".getBytes());
-                        lock_state_img.setImageResource(R.drawable.safe_door_um_locked);
+                        lock_state_img.setImageResource(R.drawable.sdu_locked_blue);
                         lock_state_btn.setText(R.string.open_door);
                         door_closed = true;
                     }
@@ -129,12 +129,6 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
         return true;
-    }
-
-    @Override
-    protected void onDestroy() {
-        // TODO: disconnect the bluetooth
-        super.onDestroy();
     }
 
     @Override
