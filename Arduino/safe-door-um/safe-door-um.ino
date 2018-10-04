@@ -4,45 +4,49 @@
 int servoPin = 3;
 int redLedPin = 4;
 int greenLedPin = 6;
+int inputButton = 12;
 // Values
 int servoOpen = 30;
 int servoClose = 120;
+int inputButtonValue = 0;
 // Vars
 Servo servoInstance;
 int servoPosition;
 int btMessage;
 
 void setup() {
-  Serial.begin(9600);  
+  Serial.begin(9600);
   pinMode(redLedPin, OUTPUT);
   pinMode(greenLedPin, OUTPUT);
+  pinMode(inputButton, INPUT);
   servoInstance.attach(servoPin); // 650, 2550
   delay(250);
 
   servoPosition = servoInstance.read();
-  if(servoPosition < servoClose) {
+  if (servoPosition < servoClose) {
     closeDoor();
   }
-  
+
   Serial.println(servoPosition);
 }
 
 void loop() {
+  inputButtonValue = digitalRead(inputButton);
+
   if (Serial.available() > 0) {
     btMessage = Serial.read();
   }
-  switch (btMessage) {
-    case 'a':
-      if(servoPosition > servoOpen) {
-        openDoor();
-      }
-      break;
-    case 'b':
-      if(servoPosition < servoClose) {
-        closeDoor();
-      }
-      break;
+
+  if (inputButtonValue == HIGH || btMessage == 'a') {
+    if (servoPosition > servoOpen) {
+      openDoor();
+    }
+  } else if (inputButtonValue == LOW || btMessage == 'b') {
+    if (servoPosition < servoClose) {
+      closeDoor();
+    }
   }
+
   delay(250);
 }
 
