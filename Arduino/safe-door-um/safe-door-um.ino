@@ -6,13 +6,14 @@ int redLedPin = 4;
 int greenLedPin = 6;
 int inputButton = 12;
 // Values
-int servoOpen = 30;
-int servoClose = 120;
+int servoOpen = 110;
+int servoClose = 130;
 int inputButtonValue = 0;
 // Vars
 Servo servoInstance;
 int servoPosition;
 int btMessage;
+bool opened;
 
 void setup() {
   Serial.begin(9600);
@@ -37,11 +38,11 @@ void loop() {
     btMessage = Serial.read();
   }
 
-  if (inputButtonValue == HIGH || btMessage == 'a') {
+  if ((inputButtonValue == HIGH && !opened) || btMessage == 'a') {
     if (servoPosition > servoOpen) {
       openDoor();
     }
-  } else if (inputButtonValue == LOW || btMessage == 'b') {
+  } else if ((inputButtonValue == HIGH && opened) || btMessage == 'b') {
     if (servoPosition < servoClose) {
       closeDoor();
     }
@@ -54,6 +55,7 @@ void openDoor() {
   servoInstance.write(servoOpen);
   delay(200);
   servoPosition = servoInstance.read();
+  opened = true;
   digitalWrite(greenLedPin, HIGH);
   digitalWrite(redLedPin, LOW);
 }
@@ -62,6 +64,7 @@ void closeDoor() {
   servoInstance.write(servoClose);
   delay(200);
   servoPosition = servoInstance.read();
+  opened = false;
   digitalWrite(greenLedPin, LOW);
   digitalWrite(redLedPin, HIGH);
 }
